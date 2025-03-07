@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profissional {
+  id             String                      @id @default(uuid())
+  nome           String
+  especialidades EspecialidadeProfissional[]
+  horarios       HorarioProfissional[]
+  agendamentos   Agendamento[]
+}
+
+model Especialidade {
+  id            String                      @id @default(uuid())
+  nome          String
+  duracaoMin    Int // Tempo de duração em minutos
+  profissionais EspecialidadeProfissional[]
+  Agendamento   Agendamento[]
+}
+
+model EspecialidadeProfissional {
+  id              String        @id @default(uuid())
+  profissionalId  String
+  especialidadeId String
+  profissional    Profissional  @relation(fields: [profissionalId], references: [id], onDelete: Cascade)
+  especialidade   Especialidade @relation(fields: [especialidadeId], references: [id], onDelete: Cascade)
+}
+
+model HorarioProfissional {
+  id             String       @id @default(uuid())
+  profissionalId String
+  diaSemana      Int // 0 = Domingo, 1 = Segunda, etc.
+  horarioInicio  String // "08:00"
+  horarioFim     String // "18:00"
+  profissional   Profissional @relation(fields: [profissionalId], references: [id], onDelete: Cascade)
+}
+
+model Agendamento {
+  id              String        @id @default(uuid())
+  profissionalId  String
+  especialidadeId String
+  data            DateTime
+  horarioInicio   String // "09:00"
+  horarioFim      String // "09:30"
+  clienteNome     String
+  clienteContato  String
+  profissional    Profissional  @relation(fields: [profissionalId], references: [id], onDelete: Cascade)
+  especialidade   Especialidade @relation(fields: [especialidadeId], references: [id], onDelete: Cascade)
+}
